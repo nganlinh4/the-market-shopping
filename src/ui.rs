@@ -128,8 +128,10 @@ impl eframe::App for MyApp {
                         ui.separator();
                         
                         ui.label("🎨 Theme:");
+                        let colors = self.theme.colors();
                         for theme in Theme::all().iter() {
-                            if ui.selectable_label(self.theme == *theme, theme.as_str()).clicked() {
+                            let is_selected = self.theme == *theme;
+                            if custom_category_button(ui, theme.as_str(), is_selected, colors).clicked() {
                                 self.theme = *theme;
                                 ui.close_menu();
                             }
@@ -137,10 +139,13 @@ impl eframe::App for MyApp {
                     });
                     
                     // Language selector
-                    if ui.selectable_label(self.language == Language::English, "EN").clicked() {
+                    let colors = self.theme.colors();
+                    let is_english_selected = self.language == Language::English;
+                    if custom_category_button(ui, "EN", is_english_selected, colors).clicked() {
                         self.language = Language::English;
                     }
-                    if ui.selectable_label(self.language == Language::Vietnamese, "VI").clicked() {
+                    let is_vietnamese_selected = self.language == Language::Vietnamese;
+                    if custom_category_button(ui, "VI", is_vietnamese_selected, colors).clicked() {
                         self.language = Language::Vietnamese;
                     }
                 });
@@ -485,7 +490,23 @@ fn raw_editor_window(ctx: &egui::Context, trans: &Translations, app: &mut MyApp)
 }
 
 fn custom_category_button(ui: &mut egui::Ui, label: &str, selected: bool, colors: ThemeColors) -> egui::Response {
-    let text_color = if selected { egui::Color32::WHITE } else { colors.text_primary };
+    let text_color = if selected {
+        // Calculate luminance to choose between white and black text for best contrast
+        let luminance = (colors.primary.r() as f32 * 0.299 +
+                        colors.primary.g() as f32 * 0.587 +
+                        colors.primary.b() as f32 * 0.114) / 255.0;
+        
+        if luminance > 0.5 {
+            // Light background - use dark text
+            egui::Color32::from_rgb(51, 51, 51) // dark gray text
+        } else {
+            // Dark background - use light text
+            egui::Color32::WHITE
+        }
+    } else {
+        colors.text_primary
+    };
+    
     let rich_text = egui::RichText::new(label).color(text_color);
     
     let button = egui::Button::new(rich_text)
