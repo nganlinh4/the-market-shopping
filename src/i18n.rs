@@ -121,4 +121,95 @@ impl Translations {
             Language::Vietnamese => "Trình chỉnh sửa danh sách thô",
         }
     }
+
+    pub fn all_items(&self) -> &'static str {
+        match self.lang {
+            Language::English => "All Items",
+            Language::Vietnamese => "Tất cả mặt hàng",
+        }
+    }
+
+    pub fn item_manager(&self) -> &'static str {
+        match self.lang {
+            Language::English => "Item Manager",
+            Language::Vietnamese => "Quản lý mặt hàng",
+        }
+    }
+
+    pub fn add_item(&self) -> &'static str {
+        match self.lang {
+            Language::English => "Add Item",
+            Language::Vietnamese => "Thêm mặt hàng",
+        }
+    }
+
+    pub fn item_code(&self) -> &'static str {
+        match self.lang {
+            Language::English => "Item Code",
+            Language::Vietnamese => "Mã mặt hàng",
+        }
+    }
+
+    pub fn item_description(&self) -> &'static str {
+        match self.lang {
+            Language::English => "Description",
+            Language::Vietnamese => "Mô tả",
+        }
+    }
+
+    pub fn item_price(&self) -> &'static str {
+        match self.lang {
+            Language::English => "Price (won)",
+            Language::Vietnamese => "Giá (won)",
+        }
+    }
+
+    pub fn item_category(&self) -> &'static str {
+        match self.lang {
+            Language::English => "Category",
+            Language::Vietnamese => "Danh mục",
+        }
+    }
+
+    pub fn delete(&self) -> &'static str {
+        match self.lang {
+            Language::English => "Delete",
+            Language::Vietnamese => "Xóa",
+        }
+    }
+
+    pub fn edit(&self) -> &'static str {
+        match self.lang {
+            Language::English => "Edit",
+            Language::Vietnamese => "Chỉnh sửa",
+        }
+    }
+
+    pub fn clear_cart(&self) -> &'static str {
+        match self.lang {
+            Language::English => "Clear Cart",
+            Language::Vietnamese => "Xóa giỏ hàng",
+        }
+    }
+
+    pub fn generate_list(&self) -> &'static str {
+        match self.lang {
+            Language::English => "Generate List",
+            Language::Vietnamese => "Tạo danh sách",
+        }
+    }
+
+    pub fn copied_notification(&self) -> &'static str {
+        match self.lang {
+            Language::English => "Copied to clipboard!",
+            Language::Vietnamese => "Đã sao chép vào bộ nhớ đệm!",
+        }
+    }
+
+    pub fn settings(&self) -> &'static str {
+        match self.lang {
+            Language::English => "Settings",
+            Language::Vietnamese => "Cài đặt",
+        }
+    }
 }
