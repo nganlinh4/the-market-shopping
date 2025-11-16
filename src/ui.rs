@@ -8,8 +8,9 @@ impl eframe::App for MyApp {
         egui::CentralPanel::default().show(ctx, |ui| {
             let trans = Translations::new(self.language);
 
-            // Language selector at top
+            // All header controls in one row
             ui.horizontal(|ui| {
+                // Language selector
                 ui.label("Language:");
                 if ui.selectable_label(self.language == Language::English, trans.english()).clicked() {
                     self.language = Language::English;
@@ -17,21 +18,25 @@ impl eframe::App for MyApp {
                 if ui.selectable_label(self.language == Language::Vietnamese, trans.vietnamese()).clicked() {
                     self.language = Language::Vietnamese;
                 }
-            });
-
-            ui.heading(trans.heading());
-
-            ui.horizontal(|ui| {
+                
+                ui.separator();
+                
+                // Title
+                ui.heading(trans.heading());
+                
+                ui.separator();
+                
+                // Search
                 ui.label(trans.search());
                 ui.text_edit_singleline(&mut self.search);
+                
+                ui.separator();
+                
+                // Edit raw list button
+                if ui.button(trans.edit_list()).clicked() {
+                    self.show_raw_editor = true;
+                }
             });
-
-            ui.add_space(8.0);
-
-            // Edit raw list button
-            if ui.button(trans.edit_list()).clicked() {
-                self.show_raw_editor = true;
-            }
 
             ui.add_space(8.0);
 
