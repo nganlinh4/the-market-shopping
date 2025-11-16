@@ -2,6 +2,7 @@ mod app;
 mod i18n;
 mod models;
 mod fonts;
+mod raw_data;
 mod ui;
 
 use app::MyApp;

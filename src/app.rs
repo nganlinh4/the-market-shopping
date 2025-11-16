@@ -1,4 +1,5 @@
 use crate::models::{Item, Language, ItemCategory, Theme};
+use crate::raw_data;
 use std::collections::HashMap;
 
 pub struct MyApp {
@@ -21,26 +22,23 @@ pub struct MyApp {
 
 impl MyApp {
     pub fn new() -> Self {
-        // Get the directory where the executable is located
-        let exe_dir = std::env::current_exe()
-            .unwrap_or_else(|_| std::path::PathBuf::from("."))
-            .parent()
-            .unwrap_or_else(|| std::path::Path::new("."))
-            .to_path_buf();
+        // Try to load CSV file from various locations (optional)
+        let csv_content = Self::load_csv_file();
+        
+        // Use embedded raw data (no external file dependencies)
+        let raw_content = raw_data::RAW_LIST_DATA.to_string();
+        eprintln!("Loaded embedded raw list data successfully");
 
-        // Try to load CSV file from various locations
-        let csv_content = Self::load_file_from_paths(&exe_dir, "items.csv");
-        if csv_content.is_empty() {
-            eprintln!("Warning: Could not load items.csv from any location. Using empty catalog.");
-        }
-
-        // Try to load raw content file from various locations
-        let raw_content = Self::load_file_from_paths(&exe_dir, "raw-list.txt");
-        if raw_content.is_empty() {
-            eprintln!("Warning: Could not load raw-list.txt from any location. Starting with empty content.");
-        }
-
-        let items = Self::parse_items(&csv_content);
+        let items = if csv_content.is_empty() {
+            // If no CSV file found, generate items from embedded raw data
+            let _raw_items = raw_data::extract_initial_items(); // Can be used for future features
+            let generated_items = Self::parse_raw_list(&raw_content);
+            eprintln!("Generated {} items from embedded raw data", generated_items.len());
+            generated_items
+        } else {
+            Self::parse_items(&csv_content)
+        };
+        
         eprintln!("Loaded {} items into catalog", items.len());
 
         Self {
@@ -62,25 +60,35 @@ impl MyApp {
         }
     }
 
-    fn load_file_from_paths(exe_dir: &std::path::Path, filename: &str) -> String {
-        // Try multiple possible locations for the file
+    fn load_csv_file() -> String {
+        // Get the directory where the executable is located
+        let exe_dir = std::env::current_exe()
+            .unwrap_or_else(|_| std::path::PathBuf::from("."))
+            .parent()
+            .unwrap_or_else(|| std::path::Path::new("."))
+            .to_path_buf();
+
+        // Try to load CSV file from various locations
         let possible_paths = [
-            exe_dir.join(filename),                       // Same directory as executable
-            exe_dir.parent().unwrap().join(filename),     // Parent directory
-            exe_dir.parent().unwrap().parent().unwrap().join(filename), // Grandparent (project root)
-            std::path::PathBuf::from(filename),           // Current working directory
+            exe_dir.join("items.csv"),                       // Same directory as executable
+            exe_dir.parent().unwrap().join("items.csv"),     // Parent directory
+            exe_dir.parent().unwrap().parent().unwrap().join("items.csv"), // Grandparent (project root)
+            std::path::PathBuf::from("items.csv"),           // Current working directory
         ];
         
         for path in &possible_paths {
             if path.exists() {
                 match std::fs::read_to_string(path) {
-                    Ok(content) => return content,
-                    Err(e) => eprintln!("Failed to read {} from {:?}: {}", filename, path, e),
+                    Ok(content) => {
+                        eprintln!("Loaded items.csv from: {:?}", path);
+                        return content;
+                    },
+                    Err(e) => eprintln!("Failed to read items.csv from {:?}: {}", path, e),
                 }
             }
         }
         
-        String::new() // Return empty string if file not found in any location
+        String::new() // Return empty string if file not found
     }
 
     pub fn parse_items(content: &str) -> Vec<Item> {
