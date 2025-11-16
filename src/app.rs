@@ -21,29 +21,24 @@ pub struct MyApp {
 
 impl MyApp {
     pub fn new() -> Self {
-        // Try to load CSV file, fall back to empty if not found
-        let csv_content = match std::fs::read_to_string("items.csv") {
-            Ok(content) => {
-                eprintln!("Loaded items.csv successfully");
-                content
-            }
-            Err(e) => {
-                eprintln!("Warning: Could not load items.csv: {}. Using empty catalog.", e);
-                String::new()
-            }
-        };
+        // Get the directory where the executable is located
+        let exe_dir = std::env::current_exe()
+            .unwrap_or_else(|_| std::path::PathBuf::from("."))
+            .parent()
+            .unwrap_or_else(|| std::path::Path::new("."))
+            .to_path_buf();
 
-        // Try to load raw content file, fall back to empty if not found
-        let raw_content = match std::fs::read_to_string("raw-list.txt") {
-            Ok(content) => {
-                eprintln!("Loaded raw-list.txt successfully");
-                content
-            }
-            Err(e) => {
-                eprintln!("Warning: Could not load raw-list.txt: {}. Starting with empty content.", e);
-                String::new()
-            }
-        };
+        // Try to load CSV file from various locations
+        let csv_content = Self::load_file_from_paths(&exe_dir, "items.csv");
+        if csv_content.is_empty() {
+            eprintln!("Warning: Could not load items.csv from any location. Using empty catalog.");
+        }
+
+        // Try to load raw content file from various locations
+        let raw_content = Self::load_file_from_paths(&exe_dir, "raw-list.txt");
+        if raw_content.is_empty() {
+            eprintln!("Warning: Could not load raw-list.txt from any location. Starting with empty content.");
+        }
 
         let items = Self::parse_items(&csv_content);
         eprintln!("Loaded {} items into catalog", items.len());
@@ -65,6 +60,27 @@ impl MyApp {
             edit_item_category: ItemCategory::Other,
             notification: None,
         }
+    }
+
+    fn load_file_from_paths(exe_dir: &std::path::Path, filename: &str) -> String {
+        // Try multiple possible locations for the file
+        let possible_paths = [
+            exe_dir.join(filename),                       // Same directory as executable
+            exe_dir.parent().unwrap().join(filename),     // Parent directory
+            exe_dir.parent().unwrap().parent().unwrap().join(filename), // Grandparent (project root)
+            std::path::PathBuf::from(filename),           // Current working directory
+        ];
+        
+        for path in &possible_paths {
+            if path.exists() {
+                match std::fs::read_to_string(path) {
+                    Ok(content) => return content,
+                    Err(e) => eprintln!("Failed to read {} from {:?}: {}", filename, path, e),
+                }
+            }
+        }
+        
+        String::new() // Return empty string if file not found in any location
     }
 
     pub fn parse_items(content: &str) -> Vec<Item> {
@@ -127,7 +143,7 @@ impl MyApp {
                 let after_slash = line[slash_pos + 1..].trim();
                 
                 // Extract price (handle arrow notation for sales)
-                let price_str = if let Some(arrow_pos) = after_slash.find('→') {
+                let price_str = if let Some(_arrow_pos) = after_slash.find('→') {
                     // Find the character boundary after the arrow
                     let arrow_char_indices: Vec<_> = after_slash.char_indices().collect();
                     if let Some(&(arrow_byte_pos, _)) = arrow_char_indices.iter().find(|&&(_, c)| c == '→') {
@@ -169,12 +185,22 @@ impl MyApp {
     }
     
     pub fn save_items_to_csv(&self) -> Result<(), Box<dyn std::error::Error>> {
+        // Get the directory where the executable is located
+        let exe_dir = std::env::current_exe()
+            .unwrap_or_else(|_| std::path::PathBuf::from("."))
+            .parent()
+            .unwrap_or_else(|| std::path::Path::new("."))
+            .to_path_buf();
+
+        let save_path = exe_dir.join("items.csv");
+        
         let mut wtr = csv::Writer::from_writer(vec![]);
         for item in &self.items {
             wtr.serialize(item)?;
         }
         let data = String::from_utf8(wtr.into_inner()?)?;
-        std::fs::write("items.csv", data)?;
+        std::fs::write(&save_path, data)?;
+        eprintln!("Successfully saved items to: {:?}", save_path);
         Ok(())
     }
 
