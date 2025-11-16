@@ -155,18 +155,19 @@ impl eframe::App for MyApp {
                 ui.heading("Categories");
                 ui.separator();
                 
+                let colors = self.theme.colors();
+                
                 // "All Items" button
-                if ui.selectable_label(
-                    self.selected_category == ItemCategory::Other && self.search.is_empty(),
-                    trans.all_items()
-                ).clicked() {
+                let is_selected = self.selected_category == ItemCategory::Other && self.search.is_empty();
+                if custom_category_button(ui, trans.all_items(), is_selected, colors).clicked() {
                     self.selected_category = ItemCategory::Other;
                     self.search.clear();
                 }
                 
                 // Category buttons
                 for category in ItemCategory::all().iter() {
-                    if ui.selectable_label(self.selected_category == *category, category.as_str()).clicked() {
+                    let is_selected = self.selected_category == *category;
+                    if custom_category_button(ui, category.as_str(), is_selected, colors).clicked() {
                         self.selected_category = *category;
                         self.search.clear();
                     }
@@ -481,4 +482,14 @@ fn raw_editor_window(ctx: &egui::Context, trans: &Translations, app: &mut MyApp)
     if !is_open {
         app.show_raw_editor = false;
     }
+}
+
+fn custom_category_button(ui: &mut egui::Ui, label: &str, selected: bool, colors: ThemeColors) -> egui::Response {
+    let text_color = if selected { egui::Color32::WHITE } else { colors.text_primary };
+    let rich_text = egui::RichText::new(label).color(text_color);
+    
+    let button = egui::Button::new(rich_text)
+        .fill(if selected { colors.primary } else { colors.card });
+    
+    ui.add(button)
 }
