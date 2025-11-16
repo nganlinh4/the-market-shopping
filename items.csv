@@ -1,0 +1,139 @@
+code,description,price
+GB01,Giò heo hầm kiểu thái lan 1pack,15000
+GB04,Phở gà 1pack,6500
+GB06,Set rau bún phở 1pack (200g),1000
+KK01,thịt viên chiên 1kg,10000
+KK02,chả giò 700g,8000
+KK03,Xúc xích cơm 500g,7000
+KK05,xúc xích miến 500g,7000
+KK09,gà ủ muối 1ea,12000
+KK12,xương gà tẩm gia vị 500g,2000
+KK16,Nước mắm pha sẵn RED 1ea,4000
+KK17,Nước mắm pha sẵn GREEN 1ea,4000
+KK20,Phở bò 1pack,6000
+KK21,Muối ớt đỏ 1EA,2000
+KK22,Bún Bò Huế 1pack,6500
+KK25,Lạp xưởng 1pack (500g),8000
+KK32,Bún Riêu 1pack,6500
+PG01,thịt mông 1kg,6500
+PG02,thịt nạc lộn mỡ 1kg,5700
+PG02-5,thịt nạc lộn mỡ ★5kg★,27000
+PG03,thịt xay 1kg,5700
+PG05*2,sườn non ba chỉ ★2kg★,10000
+PG06,thịt cổ 1kg,9000
+PG07,Thịt ba chỉ cắt lát 1kg,10000
+PG07-1,Thịt ba chỉ nguyên tảng lọc da 1kg,10000
+PG08,Ba Chỉ có da 1kg,11000
+PG09,sườn thanh 1kg,9000
+PG12,chân dò lợn L 1ea,10000
+PG15,vú sữa 1kg,5000
+PG16,tai lợn 1set,2000
+PG17,mỡ lợn 1kg,3500
+PG17*4,mỡ lợn ★4kg★,12000
+PG18,lưỡi lợn 2ea,4000
+PG20,dạ dày 1ea,3000
+PG21,gan lợn 1ea,3000
+PG24,đuôi lợn 1kg,4000
+PG26,đầu lợn 1ea,25000
+PG27,thịt mỡ xay 1kg,3500
+PG27-3,thịt mỡ xay ★3kg★,9000
+PG30,Khấu đuôi 1kg,10000
+PG32,tim lợn 3ea,4000
+CK01,đùi gà 1kg,5900
+CK02,cánh gà 1kg,8000
+CK03,con gà nhỏ 1ea,6000
+CK04,Gà dai 1ea,6000
+CK07,thịt sụn gà 1kg,7000
+CK09,chân gà 1kg,5000
+CK09*2,chân gà ★2kg★,9000
+CK10,mề gà 1kg,5000
+CK11,Thịt gà vụn 1kg,3800
+CK12-1,ức gà 1kg,6000
+CK15,xương gà 1kg,2000
+CK15*3,xương gà ★3kg★,5000
+CK16,phao câu 1kg,2500
+CK19,chân gà rút xương 1kg,15000
+CK20,cổ gà 1kg,4000
+CK20*3,cổ gà ★3kg★,9000
+CK21,cánh tỏi gà 1kg,7000
+CK22,cánh gà giữa 1kg,9000
+CK23,Nội tảng gà 1kg,9000
+DU01,con vịt 1ea,15000
+DU02,cánh vịt 1kg,4000
+CW02,thịt bò ba chỉ cắt lát 1kg,12500
+CW02-1,thịt bò ba chỉ 1kg,12500
+CW03,Mặt bò 3kg,29000
+CW04,xương sụn 1kg,6000
+CW05,sườn bò 1kg,11000
+CW06,xương ống bò 1kg,6000
+CW07,thịt bò xay 1kg,12000
+CW08,chân dò bò 2kg,20000
+CW09,xách bò 1kg,7000
+CW10,bắp bò 1kg,19000
+CW12,Gầu bò 1kg,16000
+CW13,Tổng hợp nội tạng bò 1kg,7000
+CW14,gan bò 1kg,5000
+CW16,Lòng Bò 1kg,11000
+CW17,xương cổ bò 1kg,8000
+CW18,lưỡi bò 1kg,13000
+SE01,Tôm 1kg,14000
+SE01-02,Tôm 2030 2kg,26000
+SE01-03,Tôm 3040 2kg,29000
+SE01-04,Tôm 4050 2kg,27000
+SE02-1,ghẹ 1pack,6000
+SE03,cá nục 1kg,4500
+SE04,Cá nục hoa 1kg,5000
+SE05,cá diều hồng 1pack,7000
+SE06,Cá rô phi 1pack,6000
+SE07,cá trê 1ea,6000
+SE08,Ruột sò huyết 200g,2000
+SE10,Mực ống lỡ 1kg,7000
+SE13,mực nang nhỏ 1pack,3000
+SE13*4,mực nang nhỏ ★4pack★,10000
+SE14,mực 1kg,10000
+SE16,nực cắt 1kg,5000
+SE18,tép đồng 400g,5000
+SE21,Chả cá thát lát 450g,12000
+SE22,cá đù 1pack,5000
+SE23,mực hình quả thông 1kg,6900
+SE24,viên chiên tôm 1pack,4000
+SE26,viên chiên bạch tuộc 1pack,4000
+SE31,cá basa 1 vỉ(450g),4000
+SE32,cá lóc cắt khúc 450g 1 vỉ,6700
+SE33,Tôm Sú 500g 1 vỉ,12500
+SE35,Đầu mực nang 420g,8200
+SE37,viên cá rô thì là 500g,5500
+SC01,MẮM NÊM THÁI LAN 350ml,3100
+SC03,NƯỚC CỐT CHANH 300ml,1500
+SC04,MÌ CHÍNH 500g,4500
+SC06,Dầu hào 1 chai,3000
+SC07,CÁ BA CÔ GÁI 155g,1800
+SC08,BỘT ỚT KHÔ 1 túi,6000
+SC12,BÚN KHÔ 300g,2500
+SC13,MĂNG NGÂM THÁI NHỎ 1 túi,2900
+SC14,MIẾN KHÔ 200g,1700
+SC15,PHỞ 80g 3ea,5000
+SC16,DẤM 700ml,3500
+SC27,CỤC ME 1ea,2200
+SC34,NƯỚC CỐT DỪA 500ml,3500
+SC37,TƯƠNG BẦN 350g,2900
+SC38,Nước tương 1ea,3500
+SC39,TƯƠNG ỚT THÁI 300ml,3500
+SC44,TỎI MUỐI 500ml,3500
+SC45,BÚN TƯƠI 300g,1900
+SC47,bánh tráng 300g,2800
+SC48,bánh đa mè đen 300g,2600
+SC49,hạt nêm knorr 400g,4600
+SC50,NƯỚC MẮM NAM NGƯ 900ml,5000
+SC51,chinsu tam thái tử 500ml,3400
+SC52,mắm tôm trung thành 300g,4600
+SC53,bột súp 200g,1500
+SC54,Sate Tom 100ml,3000
+SC56,CHIN-SU chili sauce 250g,2000
+SC62,Nước cốt dừa nấu ăn 1ea,3300
+SC63,Dầu ăn 500ml,3900
+SC64,Lon Ngô ngọt 425g,2000
+SC65,nước cốt chanh 500ml,1500
+SC66,Đường 1kg,3500
+SC67,muối hạt 500g,2000
+SC68,bột tẩm chiên giòn 1kg,2800
