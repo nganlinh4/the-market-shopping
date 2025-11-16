@@ -65,6 +65,11 @@ The application will start maximized and automatically load:
 cargo build --release
 ```
 
+**Important**: When distributing the application, ensure the following files are included alongside the executable:
+- `items.csv` - Product database (required)
+- `raw-list.txt` - Alternative import format (optional)
+- `fonts/NotoColorEmoji.ttf` - Emoji font support (required for emoji display)
+
 ## 📁 Project Structure
 
 ```
@@ -76,7 +81,7 @@ src/
 ├── fonts.rs        # Font loading and Vietnamese text support
 └── main.rs         # Application entry point
 
-data/
+files/
 ├── items.csv       # Main product database (130+ items)
 ├── raw-list.txt    # Alternative text-based import format
 └── fonts/

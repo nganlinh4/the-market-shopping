@@ -21,9 +21,33 @@ pub struct MyApp {
 
 impl MyApp {
     pub fn new() -> Self {
-        let csv_content = std::fs::read_to_string("items.csv").unwrap();
-        let raw_content = std::fs::read_to_string("raw-list.txt").unwrap();
+        // Try to load CSV file, fall back to empty if not found
+        let csv_content = match std::fs::read_to_string("items.csv") {
+            Ok(content) => {
+                eprintln!("Loaded items.csv successfully");
+                content
+            }
+            Err(e) => {
+                eprintln!("Warning: Could not load items.csv: {}. Using empty catalog.", e);
+                String::new()
+            }
+        };
+
+        // Try to load raw content file, fall back to empty if not found
+        let raw_content = match std::fs::read_to_string("raw-list.txt") {
+            Ok(content) => {
+                eprintln!("Loaded raw-list.txt successfully");
+                content
+            }
+            Err(e) => {
+                eprintln!("Warning: Could not load raw-list.txt: {}. Starting with empty content.", e);
+                String::new()
+            }
+        };
+
         let items = Self::parse_items(&csv_content);
+        eprintln!("Loaded {} items into catalog", items.len());
+
         Self {
             items,
             search: String::new(),
@@ -104,7 +128,14 @@ impl MyApp {
                 
                 // Extract price (handle arrow notation for sales)
                 let price_str = if let Some(arrow_pos) = after_slash.find('→') {
-                    after_slash[arrow_pos + 1..].trim()
+                    // Find the character boundary after the arrow
+                    let arrow_char_indices: Vec<_> = after_slash.char_indices().collect();
+                    if let Some(&(arrow_byte_pos, _)) = arrow_char_indices.iter().find(|&&(_, c)| c == '→') {
+                        let after_arrow = &after_slash[arrow_byte_pos + '→'.len_utf8()..];
+                        after_arrow.trim()
+                    } else {
+                        after_slash
+                    }
                 } else {
                     after_slash
                 };
