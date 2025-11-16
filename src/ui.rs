@@ -16,10 +16,90 @@ impl eframe::App for MyApp {
             }
         }
 
-        // Set background color based on theme
+        // Set comprehensive visuals based on theme
         ctx.set_visuals(egui::Visuals {
             panel_fill: colors.background,
             window_fill: colors.card,
+            override_text_color: Some(colors.text_primary),
+            text_cursor: egui::Stroke {
+                width: 1.0,
+                color: colors.text_primary,
+            },
+            widgets: egui::style::Widgets {
+                noninteractive: egui::style::WidgetVisuals {
+                    bg_fill: colors.card,
+                    weak_bg_fill: colors.card,
+                    bg_stroke: egui::Stroke {
+                        width: 1.0,
+                        color: colors.text_secondary,
+                    },
+                    fg_stroke: egui::Stroke {
+                        width: 1.0,
+                        color: colors.text_primary,
+                    },
+                    rounding: Default::default(),
+                    expansion: 0.0,
+                },
+                inactive: egui::style::WidgetVisuals {
+                    bg_fill: colors.card,
+                    weak_bg_fill: colors.card,
+                    bg_stroke: egui::Stroke {
+                        width: 1.0,
+                        color: colors.text_secondary,
+                    },
+                    fg_stroke: egui::Stroke {
+                        width: 1.0,
+                        color: colors.text_primary,
+                    },
+                    rounding: Default::default(),
+                    expansion: 0.0,
+                },
+                hovered: egui::style::WidgetVisuals {
+                    bg_fill: colors.primary,
+                    weak_bg_fill: colors.primary,
+                    bg_stroke: egui::Stroke {
+                        width: 1.0,
+                        color: colors.primary,
+                    },
+                    fg_stroke: egui::Stroke {
+                        width: 1.0,
+                        color: egui::Color32::WHITE,
+                    },
+                    rounding: Default::default(),
+                    expansion: 0.0,
+                },
+                active: egui::style::WidgetVisuals {
+                    bg_fill: colors.primary,
+                    weak_bg_fill: colors.primary,
+                    bg_stroke: egui::Stroke {
+                        width: 1.0,
+                        color: colors.primary,
+                    },
+                    fg_stroke: egui::Stroke {
+                        width: 1.0,
+                        color: egui::Color32::WHITE,
+                    },
+                    rounding: Default::default(),
+                    expansion: 0.0,
+                },
+                open: egui::style::WidgetVisuals {
+                    bg_fill: colors.card,
+                    weak_bg_fill: colors.card,
+                    bg_stroke: egui::Stroke {
+                        width: 1.0,
+                        color: colors.primary,
+                    },
+                    fg_stroke: egui::Stroke {
+                        width: 1.0,
+                        color: colors.text_primary,
+                    },
+                    rounding: Default::default(),
+                    expansion: 0.0,
+                },
+            },
+            code_bg_color: colors.card,
+            faint_bg_color: colors.card,
+            extreme_bg_color: colors.card,
             ..Default::default()
         });
 
@@ -391,15 +471,11 @@ fn raw_editor_window(ctx: &egui::Context, trans: &Translations, app: &mut MyApp)
             
             ui.separator();
             
-            egui::ScrollArea::vertical()
-                .auto_shrink([false; 2])
-                .show(ui, |ui| {
-                    ui.add(
-                        egui::TextEdit::multiline(&mut app.raw_content)
-                            .desired_rows(20)
-                            .desired_width(f32::INFINITY)
-                    );
-                });
+            ui.add(
+                egui::TextEdit::multiline(&mut app.raw_content)
+                    .desired_rows(20)
+                    .desired_width(f32::INFINITY)
+            );
         });
     
     if !is_open {
