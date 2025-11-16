@@ -1,151 +1,122 @@
-use dioxus::prelude::*;
+use eframe::egui;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::sync::Arc;
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 struct Item {
     code: String,
     description: String,
     price: u32,
 }
 
-#[derive(Debug, Clone)]
-struct SelectedItem {
-    code: Arc<String>,
-    item: Item,
-    amount: f32,
+struct MyApp {
+    items: Vec<Item>,
+    search: String,
+    selected: HashMap<String, i32>,
+    print_output: String,
 }
 
-fn main() {
-    dioxus_desktop::launch::launch(app, vec![], dioxus_desktop::Config::default());
-}
-
-fn app() -> Element {
-    let items = use_resource(|| async {
+impl MyApp {
+    fn new() -> Self {
         let mut rdr = csv::Reader::from_path("items.csv").unwrap();
-        let mut items = Vec::new();
-        for result in rdr.deserialize() {
-            let item: Item = result.unwrap();
-            items.push(item);
-        }
-        items
-    });
-
-    let mut search_query = use_signal(|| String::new());
-    let mut selected_items = use_signal(|| HashMap::<Arc<String>, SelectedItem>::new());
-    let mut print_output = use_signal(|| String::new());
-
-    let filtered_items = use_memo(move || {
-        let query = search_query().to_lowercase();
-        let all_items = items.value().as_ref().map(|r| (**r).to_vec()).unwrap_or_else(|| vec![]);
-        if query.is_empty() {
-            all_items
-        } else {
-            all_items
-                .into_iter()
-                .filter(|item| {
-                    item.code.to_lowercase().contains(&query)
-                        || item.description.to_lowercase().contains(&query)
-                })
-                .collect::<Vec<_>>()
-        }
-    });
-
-    let total_cost = use_memo(move || {
-        selected_items()
-            .values()
-            .map(|si| (si.item.price as f32) * si.amount)
-            .sum::<f32>() as u32
-    });
-
-    rsx! {
-        div { class: "container",
-            h1 { "Market Shopping App" }
-
-            input {
-                r#type: "text",
-                placeholder: "Search items...",
-                value: "{search_query}",
-                oninput: move |e| search_query.set(e.value())
-            }
-
-            div { class: "items-list",
-                for item in filtered_items.read().clone() {
-                    div { class: "item",
-                        span { "{item.code}: {item.description} - {item.price} won" }
-                        input {
-                            r#type: "number",
-                            step: "1",
-                            placeholder: "Amount",
-                            oninput: move |e| {
-                                if let Ok(amount) = e.value().parse::<f32>() {
-                                    if amount > 0.0 {
-                                        let code_arc = Arc::new(item.code.clone());
-                                        selected_items.write().insert(
-                                            code_arc.clone(),
-                                            SelectedItem {
-                                                code: code_arc,
-                                                item: item.clone(),
-                                                amount,
-                                            },
-                                        );
-                                    } else {
-                                        let code_arc = Arc::new(item.code.clone());
-                                        selected_items.write().remove(&code_arc);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            h2 { "Selected Items" }
-            div { class: "selected-list",
-                for (_code, si) in selected_items().clone().into_iter() {
-                    div { class: "selected-item",
-                        "{si.code} {si.item.description} ({si.amount} phần)"
-                        input {
-                            r#type: "number",
-                            step: "1",
-                            value: "{si.amount}",
-                            oninput: move |e| {
-                                let code = si.code.clone();
-                                let item = si.item.clone();
-                                if let Ok(amt) = e.value().parse::<f32>() {
-                                    if amt > 0.0 {
-                                        selected_items.write().insert(code.clone(), SelectedItem {
-                                            code: code.clone(),
-                                            item: item.clone(),
-                                            amount: amt,
-                                        });
-                                    } else {
-                                        selected_items.write().remove(&code);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            h2 { "Total Cost: {total_cost} won" }
-
-            button {
-                onclick: move |_| {
-                    let selected = selected_items();
-                    let output = selected.values().map(|si| {
-                        format!("{} {} ({:.0} phần)", si.code, si.item.description, si.amount)
-                    }).collect::<Vec<_>>().join("\n");
-                    print_output.set(output);
-                },
-                "Print List"
-            }
-
-            if !print_output().is_empty() {
-                pre { "{print_output}" }
-            }
+        let items: Vec<Item> = rdr.deserialize().map(|r| r.unwrap()).collect();
+        Self {
+            items,
+            search: String::new(),
+            selected: HashMap::new(),
+            print_output: String::new(),
         }
     }
+}
+
+impl eframe::App for MyApp {
+    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        egui::CentralPanel::default().show(ctx, |ui| {
+            ui.heading("Market Shopping App");
+
+            ui.horizontal(|ui| {
+                ui.label("Search:");
+                ui.text_edit_singleline(&mut self.search);
+            });
+
+            let query = self.search.to_lowercase();
+            let filtered_items: Vec<&Item> = self.items.iter().filter(|item| {
+                query.is_empty()
+                    || item.code.to_lowercase().contains(&query)
+                    || item.description.to_lowercase().contains(&query)
+            }).collect();
+
+            ui.heading("Items");
+            egui::ScrollArea::vertical().show(ui, |ui| {
+                for item in &filtered_items {
+                    ui.horizontal(|ui| {
+                        ui.label(format!("{}: {} - {} won", item.code, item.description, item.price));
+                        let mut amount = *self.selected.get(&item.code).unwrap_or(&0) as f32;
+                        if ui.add(egui::DragValue::new(&mut amount).speed(1.0).clamp_range(0.0..=1000.0)).changed() {
+                            let amt = amount as i32;
+                            if amt > 0 {
+                                self.selected.insert(item.code.clone(), amt);
+                            } else {
+                                self.selected.remove(&item.code);
+                            }
+                        }
+                    });
+                }
+            });
+
+            ui.separator();
+
+            ui.heading("Selected Items");
+            egui::ScrollArea::vertical().show(ui, |ui| {
+                for (code, amount) in &self.selected.clone() {
+                    if let Some(item) = self.items.iter().find(|i| &i.code == code) {
+                        ui.horizontal(|ui| {
+                            ui.label(format!("{} {} ({:.0} phần)", code, item.description, amount));
+                            if ui.button("-").clicked() {
+                                let new_amt = *amount - 1;
+                                if new_amt > 0 {
+                                    *self.selected.get_mut(code).unwrap() = new_amt;
+                                } else {
+                                    self.selected.remove(code);
+                                }
+                            }
+                            ui.label(amount.to_string());
+                            if ui.button("+").clicked() {
+                                *self.selected.get_mut(code).unwrap() += 1;
+                            }
+                        });
+                    }
+                }
+            });
+
+            ui.separator();
+
+            let total: f32 = self.selected.iter().map(|(code, &amount)| {
+                self.items.iter().find(|i| i.code == *code).unwrap().price as f32 * amount as f32
+            }).sum();
+            ui.label(format!("Total Cost: {:.0} won", total));
+
+            if ui.button("Print List").clicked() {
+                let output = self.selected.iter().map(|(code, &amount)| {
+                    let item = self.items.iter().find(|i| i.code == *code).unwrap();
+                    format!("{} {} ({:.0} phần)", code, item.description, amount)
+                }).collect::<Vec<_>>().join("\n");
+                self.print_output = output;
+            }
+
+            if !self.print_output.is_empty() {
+                ui.label("Printed List:");
+                ui.add(egui::TextEdit::multiline(&mut self.print_output).interactive(false));
+            }
+        });
+    }
+}
+
+fn main() -> eframe::Result<()> {
+    let options = eframe::NativeOptions::default();
+    eframe::run_native(
+        "Market Shopping App",
+        options,
+        Box::new(|_cc| Box::new(MyApp::new())),
+    )
 }
