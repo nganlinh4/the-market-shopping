@@ -40,75 +40,111 @@ impl eframe::App for MyApp {
                 ui.text_edit_singleline(&mut self.search);
             });
 
-            let query = self.search.to_lowercase();
-            let filtered_items: Vec<&Item> = self.items.iter().filter(|item| {
-                query.is_empty()
-                    || item.code.to_lowercase().contains(&query)
-                    || item.description.to_lowercase().contains(&query)
-            }).collect();
+            ui.add_space(8.0);
 
-            ui.heading("Items");
-            egui::ScrollArea::vertical().id_source("items_scroll").show(ui, |ui| {
-                for item in &filtered_items {
-                    ui.horizontal(|ui| {
-                        ui.label(format!("{}: {} - {} won", item.code, item.description, item.price));
-                        let mut amount = *self.selected.get(&item.code).unwrap_or(&0) as f32;
-                        if ui.add(egui::DragValue::new(&mut amount).speed(1.0).clamp_range(0.0..=1000.0)).changed() {
-                            let amt = amount as i32;
-                            if amt > 0 {
-                                self.selected.insert(item.code.clone(), amt);
-                            } else {
-                                self.selected.remove(&item.code);
-                            }
-                        }
-                    });
-                }
-            });
+            // Create a side-by-side layout using columns
+            ui.columns(2, |columns| {
+                // Left column: Available items
+                columns[0].vertical(|ui| {
+                    ui.heading("Available Items");
+                    
+                    let query = self.search.to_lowercase();
+                    let filtered_items: Vec<&Item> = self.items.iter().filter(|item| {
+                        query.is_empty()
+                            || item.code.to_lowercase().contains(&query)
+                            || item.description.to_lowercase().contains(&query)
+                    }).collect();
 
-            ui.separator();
-
-            ui.heading("Selected Items");
-            egui::ScrollArea::vertical().id_source("selected_scroll").show(ui, |ui| {
-                for (code, amount) in &self.selected.clone() {
-                    if let Some(item) = self.items.iter().find(|i| &i.code == code) {
-                        ui.horizontal(|ui| {
-                            ui.label(format!("{} {} ({:.0} phần)", code, item.description, amount));
-                            if ui.button("-").clicked() {
-                                let new_amt = *amount - 1;
-                                if new_amt > 0 {
-                                    *self.selected.get_mut(code).unwrap() = new_amt;
-                                } else {
-                                    self.selected.remove(code);
-                                }
-                            }
-                            ui.label(amount.to_string());
-                            if ui.button("+").clicked() {
-                                *self.selected.get_mut(code).unwrap() += 1;
+                    egui::ScrollArea::vertical()
+                        .id_source("items_scroll")
+                        .min_scrolled_height(500.0)
+                        .show(ui, |ui| {
+                            for item in &filtered_items {
+                                ui.horizontal(|ui| {
+                                    ui.label(format!("{}: {} - {} won", item.code, item.description, item.price));
+                                    let mut amount = *self.selected.get(&item.code).unwrap_or(&0) as f32;
+                                    if ui.add(egui::DragValue::new(&mut amount).speed(1.0).clamp_range(0.0..=1000.0)).changed() {
+                                        let amt = amount as i32;
+                                        if amt > 0 {
+                                            self.selected.insert(item.code.clone(), amt);
+                                        } else {
+                                            self.selected.remove(&item.code);
+                                        }
+                                    }
+                                });
                             }
                         });
+                });
+
+                // Right column: Selected items and controls
+                columns[1].vertical(|ui| {
+                    ui.heading("Selected Items");
+                    
+                    if self.selected.is_empty() {
+                        ui.label("No items selected");
+                    } else {
+                        egui::ScrollArea::vertical()
+                            .id_source("selected_scroll")
+                            .min_scrolled_height(300.0)
+                            .show(ui, |ui| {
+                                for (code, amount) in &self.selected.clone() {
+                                    if let Some(item) = self.items.iter().find(|i| &i.code == code) {
+                                        ui.horizontal(|ui| {
+                                            ui.label(format!("{} {}", code, item.description));
+                                            ui.add_space(10.0);
+                                            ui.label(format!("{:.0} phần", amount));
+                                            ui.add_space(10.0);
+                                            ui.label(format!("{} won", item.price * *amount as u32));
+                                            
+                                            if ui.button("-").clicked() {
+                                                let new_amt = *amount - 1;
+                                                if new_amt > 0 {
+                                                    *self.selected.get_mut(code).unwrap() = new_amt;
+                                                } else {
+                                                    self.selected.remove(code);
+                                                }
+                                            }
+                                            ui.label(amount.to_string());
+                                            if ui.button("+").clicked() {
+                                                *self.selected.get_mut(code).unwrap() += 1;
+                                            }
+                                        });
+                                    }
+                                }
+                            });
                     }
-                }
+
+                    ui.add_space(16.0);
+
+                    // Total cost calculation
+                    let total: f32 = self.selected.iter().map(|(code, &amount)| {
+                        self.items.iter().find(|i| i.code == *code).unwrap().price as f32 * amount as f32
+                    }).sum();
+                    
+                    // Total cost section
+                    ui.horizontal(|ui| {
+                        ui.heading("Total Cost:");
+                        ui.heading(format!("{:.0} won", total));
+                    });
+
+                    ui.add_space(8.0);
+
+                    // Print functionality
+                    if ui.button("Print List").clicked() {
+                        let output = self.selected.iter().map(|(code, &amount)| {
+                            let item = self.items.iter().find(|i| i.code == *code).unwrap();
+                            format!("{} {} ({:.0} phần)", code, item.description, amount)
+                        }).collect::<Vec<_>>().join("\n");
+                        self.print_output = output;
+                    }
+
+                    if !self.print_output.is_empty() {
+                        ui.add_space(8.0);
+                        ui.label("Printed List:");
+                        ui.add(egui::TextEdit::multiline(&mut self.print_output).interactive(false).desired_width(100.0));
+                    }
+                });
             });
-
-            ui.separator();
-
-            let total: f32 = self.selected.iter().map(|(code, &amount)| {
-                self.items.iter().find(|i| i.code == *code).unwrap().price as f32 * amount as f32
-            }).sum();
-            ui.label(format!("Total Cost: {:.0} won", total));
-
-            if ui.button("Print List").clicked() {
-                let output = self.selected.iter().map(|(code, &amount)| {
-                    let item = self.items.iter().find(|i| i.code == *code).unwrap();
-                    format!("{} {} ({:.0} phần)", code, item.description, amount)
-                }).collect::<Vec<_>>().join("\n");
-                self.print_output = output;
-            }
-
-            if !self.print_output.is_empty() {
-                ui.label("Printed List:");
-                ui.add(egui::TextEdit::multiline(&mut self.print_output).interactive(false));
-            }
         });
     }
 }
@@ -191,7 +227,7 @@ fn setup_unicode_font_fallback(ctx: &egui::Context) {
         egui::FontFamily::default(),
         vec![
             "Segoe UI".to_owned(),
-            "Arial".to_owned(),
+            "Arial".to_owned(), 
             "DejaVu Sans".to_owned(),
             "Liberation Sans".to_owned(),
             "sans-serif".to_owned(),
